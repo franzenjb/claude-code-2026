@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code 2026 Ecosystem Tracker</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface-hover: #222632;
+      --border: #2a2e3a;
+      --text: #e2e4ea;
+      --text-muted: #8b8fa3;
+      --accent: #5bb8f5;
+      --accent-dim: rgba(91, 184, 245, 0.12);
+      --green: #34d399;
+      --green-dim: rgba(52, 211, 153, 0.12);
+      --yellow: #fbbf24;
+      --yellow-dim: rgba(251, 191, 36, 0.12);
+      --slate: #64748b;
+      --slate-dim: rgba(100, 116, 139, 0.12);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #141722 0%, #1a1d2e 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 1.5rem 1.5rem;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: -0.02em;
+    }
+
+    .header p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-done .stat-value { color: var(--green); }
+    .stat-progress .stat-value { color: var(--yellow); }
+    .stat-planned .stat-value { color: var(--slate); }
+
+    .content {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .category {
+      margin-bottom: 2rem;
+    }
+
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .category-num {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+    }
+
+    .category-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .item:hover {
+      background: var(--surface-hover);
+      border-color: var(--accent);
+    }
+
+    .item-check {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+      transition: all 0.15s;
+    }
+
+    .item-check svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .item-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .item-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .item-creator {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .item-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      line-height: 1.4;
+    }
+
+    .badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    /* Status: planned */
+    .item[data-status="planned"] .item-check { border-color: var(--slate); }
+    .item[data-status="planned"] .badge {
+      background: var(--slate-dim);
+      color: var(--slate);
+    }
+
+    /* Status: in-progress */
+    .item[data-status="in-progress"] .item-check { border-color: var(--yellow); background: var(--yellow-dim); }
+    .item[data-status="in-progress"] .badge {
+      background: var(--yellow-dim);
+      color: var(--yellow);
+    }
+
+    /* Status: done */
+    .item[data-status="done"] .item-check { border-color: var(--green); background: var(--green-dim); }
+    .item[data-status="done"] .item-check svg { opacity: 1; stroke: var(--green); }
+    .item[data-status="done"] .badge {
+      background: var(--green-dim);
+      color: var(--green);
+    }
+
+    .footer {
+      text-align: center;
+      padding: 2rem 1.5rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 480px) {
+      .header h1 { font-size: 1.25rem; }
+      .stats-bar { gap: 1rem; }
+      .item { padding: 0.7rem 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Claude Code 2026 Ecosystem</h1>
+    <p>Comprehensive Agentic Engineering Intelligence Report -- Tracker</p>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat stat-done">
+      <div class="stat-value" id="count-done">0</div>
+      <div class="stat-label">Done</div>
+    </div>
+    <div class="stat stat-progress">
+      <div class="stat-value" id="count-progress">0</div>
+      <div class="stat-label">In Progress</div>
+    </div>
+    <div class="stat stat-planned">
+      <div class="stat-value" id="count-planned">0</div>
+      <div class="stat-label">Planned</div>
+    </div>
+  </div>
+
+  <div class="content" id="app"></div>
+
+  <div class="footer">
+    Source: <em>Claude Code 2026 Ecosystem Report</em> (April 2026)<br>
+    <a href="https://maps.jbf.com">maps.jbf.com</a>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'claude-code-2026-status';
+
+    const categories = [
+      {
+        num: 1,
+        title: 'Core Frameworks & Methodologies',
+        items: [
+          { id: 'superpowers', name: 'Superpowers', creator: 'Jesse Vincent', desc: 'Autonomous Test-Driven Development (TDD) workflow.' },
+          { id: 'composio', name: 'Composio', creator: 'Jonathan Acuna', desc: 'Integration layer connecting Claude to 500+ tools (GitHub, Slack).' },
+          { id: 'claude-md', name: 'CLAUDE.md', creator: 'Anthropic', desc: 'Persistent project-level "memory" and local ruleset.' },
+        ]
+      },
+      {
+        num: 2,
+        title: 'Design & "Taste" Skills',
+        items: [
+          { id: 'taste-skill', name: 'Taste-Skill', creator: 'Emil Kowalski', desc: '/polish animations, /critique landing-page.' },
+          { id: 'impeccable', name: 'Impeccable', creator: 'Paul Bakaus', desc: 'Aligns AI output with high-end design vocabulary.' },
+          { id: 'tech-graph', name: 'Tech-Graph', creator: 'Chase-H-AI', desc: 'Automatic SVG/PNG architecture diagram generation.' },
+        ]
+      },
+      {
+        num: 3,
+        title: 'Community "Secret Codes" & Modes',
+        items: [
+          { id: 'l99', name: 'L99', creator: '', desc: 'Depth Mode. Forces committed engineering logic over conversational hedging.' },
+          { id: 'godmode', name: '/godmode', creator: '', desc: 'Viral command for unrestricted agentic behavior (requires plugin).' },
+          { id: 'stealth', name: '/stealth', creator: '', desc: 'Removes AI-signatures from code comments and documentation.' },
+          { id: 'crowbar', name: '/crowbar', creator: '', desc: 'Specialized mode for finding security vulnerabilities.' },
+          { id: 'xray', name: '/xray', creator: '', desc: 'Forensic reverse-engineering of front-end tech stacks.' },
+        ]
+      },
+      {
+        num: 4,
+        title: 'Productivity & Knowledge Mapping',
+        items: [
+          { id: 'graphify', name: 'Graphify', creator: '', desc: 'Codebase Knowledge Graph; 71x more token efficient.' },
+          { id: 'notebooklm-py', name: 'NotebookLM-py', creator: '', desc: 'Bridges Claude to Google NotebookLM research sources.' },
+          { id: 'skill-creator', name: 'Skill Creator', creator: '', desc: 'Meta-agent designed to write and iterate on Claude Skills.' },
+        ]
+      }
+    ];
+
+    const statusCycle = ['planned', 'in-progress', 'done'];
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch { return {}; }
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function updateCounts(state) {
+      let done = 0, progress = 0, planned = 0;
+      categories.forEach(cat => cat.items.forEach(item => {
+        const s = state[item.id] || 'planned';
+        if (s === 'done') done++;
+        else if (s === 'in-progress') progress++;
+        else planned++;
+      }));
+      document.getElementById('count-done').textContent = done;
+      document.getElementById('count-progress').textContent = progress;
+      document.getElementById('count-planned').textContent = planned;
+    }
+
+    function render() {
+      const state = loadState();
+      const app = document.getElementById('app');
+      app.innerHTML = '';
+
+      categories.forEach(cat => {
+        const section = document.createElement('div');
+        section.className = 'category';
+
+        section.innerHTML = `
+          <div class="category-header">
+            <span class="category-num">${cat.num}</span>
+            <span class="category-title">${cat.title}</span>
+          </div>
+          <div class="items"></div>
+        `;
+
+        const itemsEl = section.querySelector('.items');
+
+        cat.items.forEach(item => {
+          const status = state[item.id] || 'planned';
+          const el = document.createElement('div');
+          el.className = 'item';
+          el.dataset.status = status;
+          el.dataset.id = item.id;
+
+          const creatorHtml = item.creator ? `<span class="item-creator">${item.creator}</span>` : '';
+          const statusLabel = status === 'in-progress' ? 'In Progress' : status.charAt(0).toUpperCase() + status.slice(1);
+
+          el.innerHTML = `
+            <div class="item-check">
+              <svg viewBox="0 0 12 12" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="2,6 5,9 10,3"></polyline>
+              </svg>
+            </div>
+            <div class="item-body">
+              <div class="item-name">
+                ${item.name} ${creatorHtml}
+                <span class="badge">${statusLabel}</span>
+              </div>
+              <div class="item-desc">${item.desc}</div>
+            </div>
+          `;
+
+          el.addEventListener('click', () => {
+            const currentStatus = state[item.id] || 'planned';
+            const nextIdx = (statusCycle.indexOf(currentStatus) + 1) % statusCycle.length;
+            state[item.id] = statusCycle[nextIdx];
+            saveState(state);
+            render();
+          });
+
+          itemsEl.appendChild(el);
+        });
+
+        app.appendChild(section);
+      });
+
+      updateCounts(state);
+    }
+
+    render();
+  </script>
+</body>
+</html>
